@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="stylesheet" href="styles.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Decalcomanie</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <script type="module" src="/main.js" defer></script>
+    </head>
+
+    <body class="flex flex-col h-screen bg-gray-800">
+        <!-- Barre de menu en haut -->
+        <div class="menu-bar bg-gray-800 py-1 px-4 flex items-center text-gray-100 justify-around">
+            <button id="settings-toggle">Réglages</button>
+            <button id="copy-btn">Copier dans le presse papier</button>
+            <button id="link-btn" class="text-gray-500" disabled>Obtenir un lien public</button>
+        </div>
+
+        <div class="main-container flex flex-1 overflow-hidden">
+            <!-- Barre d'outils à gauche -->
+            <div class="toolbar w-20 bg-gray-800 text-gray-100 flex flex-col items-center py-4 space-y-4">
+                <button class="text-xl" title="Sélection"><i class="fas fa-mouse-pointer"></i></button>
+                <button class="text-xl" title="Rectangle"><i class="far fa-square"></i></button>
+                <button id="btn_arrow" class="text-xl" title="Flèche"><i class="fas fa-arrow-right"></i></button>
+                <button id="clear-arrows" class="text-xl" title="Effacer"><i class="fas fa-trash-alt"></i></button>
+                <button id="text-button" class="text-xl" title="Texte"><i class="fas fa-font"></i></button>
+                <button class="text-xl" title="Crayon"><i class="fas fa-pencil-alt"></i></button>
+                <button class="text-xl" title="Pixelliser"><i class="fas fa-th-large"></i></button>
+                <button class="text-xl" title="Recadrer"><i class="fas fa-crop"></i></button>
+
+                <select id="arrow-thickness" class="border rounded bg-white text-gray-800">
+                    <option value="1">1px</option>
+                    <option value="3">3px</option>
+                    <option value="5">5px</option>
+                    <option value="7" selected>7px</option>
+                    <option value="9">9px</option>
+                    <option value="11">11px</option>
+                    <option value="13">13px</option>
+                    <option value="15">15px</option>
+                    <option value="17">17px</option>
+                    <option value="19">19px</option>
+                    <option value="21">21px</option>
+                </select>
+                <div class="flex items-center">
+                    <input type="color" id="arrow-color" value="#FF0000" class="h-8 w-8 rounded cursor-pointer" />
+                </div>
+            </div>
+
+            <!-- Zone d'image centrale -->
+            <div class="image-container flex-1 bg-gray-300 flex justify-center items-center overflow-auto p-0 rounded">
+                <div id="settings-panel" class="bg-gray-800 text-gray-100 shadow-lg inline-block w-full h-full hidden p-8">
+                    <h1>Configuration des clés API</h1>
+
+                    <form id="apiKeyForm" class="flex gap-2 flex-col mt-8">
+                        <div class="form-group">
+                            <label class="shrink-0" for="clientId">Client ID:</label>
+                            <input
+                                type="text"
+                                id="clientId"
+                                placeholder="Entrez votre Client ID"
+                                class="text-gray-100 p-1 rounded bg-gray-800 grow"
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="shrink-0" for="clientSecret">Client Secret:</label>
+                            <input
+                                type="text"
+                                id="clientSecret"
+                                placeholder="Entrez votre Client Secret"
+                                class="text-gray-100 p-1 rounded bg-gray-800 w-full grow"
+                            />
+                        </div>
+                        <div class="flex justify-end">
+                            <button class="bg-blue-500 text-gray-100 p-2 rounded" type="submit">Sauvegarder</button>
+                        </div>
+                    </form>
+                    <div>
+                        <button id="connexion" class="bg-blue-500 text-gray-100 p-2 rounded">Se connecter à Sellsy</button>
+                    </div>
+                    <div class="mt-4 flex items-center align-center justify-center w-full">
+                        <p class="text-yellow-500" id="status">En attente d'une connexion...</p>
+                    </div>
+                </div>
+                <div>
+                    <div id="image-wrapper">
+                        <div id="image-container" class="image-wrapper bg-white shadow-lg inline-block">
+                            <img id="screenshot" src="assets/menubar.png" alt="Capture d'écran" class="max-w-full h-auto" />
+                            <canvas id="drawing-canvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer bg-gray-800 text-gray-100 px-4 py-2 flex justify-between">
+            <p class="text-gray-500 m-0 text-sm" id="greet-msg"></p>
+            <p class="text-gray-500 m-0 text-sm">Décalcomanie Version 0.1 Team API</p>
+        </div>
+    </body>
+</html>
