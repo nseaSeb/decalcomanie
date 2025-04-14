@@ -7,6 +7,7 @@ mod captur;
 mod tray;
 mod store;
 mod sellsy;
+mod briefcase;
 
 #[tauri::command]
 fn greet() -> String {
@@ -29,6 +30,7 @@ fn main() {
             store::get_api_key,
             store::make_api_request,
             sellsy::get_sellsy_token,
+            briefcase::get_folder_id,
         ])
         .setup(|app| {
             #[cfg(target_os = "macos")]

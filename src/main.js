@@ -1,4 +1,5 @@
 const { invoke } = window.__TAURI__.core;
+import { test } from './test.js';
 let token = null;
 
 // Variables globales pour le dessin des flèches
@@ -16,18 +17,21 @@ const canvas = document.getElementById('drawing-canvas');
 
 const status_element = document.getElementById('status');
 const link_button = document.getElementById('link-btn');
-
+test();
 // Dans votre main.js
 console.log('Hello from JS');
 window.__TAURI__.event.listen('capture_done', (event) => {
     console.log('listening');
     const base64 = event.payload;
+    console.log("capture done");
+    console.log(base64);
     document.getElementById('screenshot').src = base64;
 });
 
 window.__TAURI__.event.listen('capture_error', () => {
     console.error('Erreur lors de la capture');
 });
+
 
 console.log('Hello from frontend');
 function enabled_link() {
@@ -36,6 +40,13 @@ function enabled_link() {
     link_button.disabled = false;
 }
 document.addEventListener('DOMContentLoaded', () => {
+    const btnbrief = document.getElementById('btn_briefcase');
+
+    if(btnbrief) {
+        console.log("btnbrief");
+
+        btnbrief.addEventListener('click', brief_case_sellsy);
+    }
     // ... votre code existant ...
     // Ajouter un bouton pour activer le mode texte
     const textButton = document.getElementById('text-button'); // Créez ce bouton dans votre HTML
@@ -106,6 +117,19 @@ const slogans = [
     'Le support ne dort jamais, il mange juste plus lentement',
 ];
 
+async function brief_case_sellsy() {
+    console.log("!!! brief case click !!!");
+    const prelog = document.getElementById('prelog');
+    console.log(prelog);
+    try {
+        const brief = await invoke('get_folder_id', {token});
+        prelog.textContent = JSON.stringify(brief);
+        console.log(brief);
+        
+    } catch (error) {
+        console.log(error);
+    }
+}
 function getRandomSlogan() {
     const index = Math.floor(Math.random() * slogans.length);
     return slogans[index];

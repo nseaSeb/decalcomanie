@@ -32,7 +32,7 @@ base64 = "0.21"
 image = { version = "0.24", features = ["png"] }
 arboard = "3.5"
 tauri-plugin-store = "2"
-reqwest = { version = "0.12", features = ["json"] }
+reqwest = { version = "0.12", features = ["json", "multipart"] }
 tokio = { version = "1", features = ["full"] }
 
 
