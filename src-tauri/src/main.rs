@@ -9,6 +9,7 @@ mod store;
 mod sellsy;
 mod briefcase;
 
+
 #[tauri::command]
 fn greet() -> String {
     match env::current_dir() {
@@ -31,6 +32,7 @@ fn main() {
             store::make_api_request,
             sellsy::get_sellsy_token,
             briefcase::get_folder_id,
+            briefcase::upload_base64_to_sellsy,
         ])
         .setup(|app| {
             #[cfg(target_os = "macos")]

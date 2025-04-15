@@ -13,6 +13,7 @@ let currentColor = '#FF0000'; // Rouge par défaut
 let textAnnotations = [];
 let isAddingText = false;
 let currentTextInput = null;
+let briefcase_id = null;
 const canvas = document.getElementById('drawing-canvas');
 
 const status_element = document.getElementById('status');
@@ -32,13 +33,18 @@ window.__TAURI__.event.listen('capture_error', () => {
     console.error('Erreur lors de la capture');
 });
 
-
 console.log('Hello from frontend');
 function enabled_link() {
     link_button.classList.toggle('text-gray-500');
     link_button.classList.toggle('text-gray-100');
     link_button.disabled = false;
 }
+async function processImageAnd(callback) {
+    const canvas = await mergeScreenshotWithAnnotations();
+    const base64 = canvas.toDataURL('image/png');
+    await callback(base64);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const btnbrief = document.getElementById('btn_briefcase');
 
@@ -53,6 +59,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (textButton) {
         textButton.addEventListener('click', enableTextMode);
     }
+
+    if (link_button) {
+
+        link_button.addEventListener("click", async () => {
+            
+            try {
+                await processImageAnd(async (base64Data) => {
+                    const result = await invoke("upload_base64_to_sellsy", {
+                        token,
+                        folderId: briefcase_id,
+                        base64Data: base64Data
+                    });
+                    console.log("Résultat de l'envoi:", result);
+                    showFeedback("📤 Image envoyée !");
+                });
+            } catch (error) {
+                console.error("Erreur lors de l'envoi :", error);
+                showFeedback("❌ Erreur envoi image");
+            }
+        });
+    }
+
+
     // Gestion du sélecteur d'épaisseur
     const thicknessSelect = document.getElementById('arrow-thickness');
     thicknessSelect.addEventListener('change', (e) => {
@@ -122,9 +151,10 @@ async function brief_case_sellsy() {
     const prelog = document.getElementById('prelog');
     console.log(prelog);
     try {
-        const brief = await invoke('get_folder_id', {token});
-        prelog.textContent = JSON.stringify(brief);
-        console.log(brief);
+        
+        briefcase_id = await invoke('get_folder_id', {token});
+        prelog.textContent = JSON.stringify(briefcase_id);
+        console.log(briefcase_id);
         
     } catch (error) {
         console.log(error);
@@ -190,83 +220,79 @@ greetMsgEl.innerHTML = getRandomSlogan();
 //     }
 // }
 async function copyImageToClipboard() {
-    const imgElement = document.getElementById('screenshot');
+    const tempCanvas = await mergeScreenshotWithAnnotations();
 
-    // Créer un canvas temporaire qui combine l'image et les flèches
-    const tempCanvas = document.createElement('canvas');
-
-    // IMPORTANT: Utiliser les dimensions de l'image réelle
-    tempCanvas.width = imgElement.naturalWidth;
-    tempCanvas.height = imgElement.naturalHeight;
-
-    const tempCtx = tempCanvas.getContext('2d');
-
-    // Dessiner l'image de fond
-    const img = new Image();
-    img.src = imgElement.src;
-
-    // Attendre que l'image soit chargée
-    await new Promise((resolve) => {
-        img.onload = resolve;
-    });
-
-    // Dessiner l'image d'abord avec ses dimensions réelles
-    tempCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
-
-    // Calculer le ratio entre les dimensions du canvas de dessin et celles de l'image réelle
-    const scaleX = tempCanvas.width / canvas.width;
-    const scaleY = tempCanvas.height / canvas.height;
-
-    // Appliquer une transformation pour compenser la différence d'échelle
-    tempCtx.save();
-    tempCtx.scale(scaleX, scaleY);
-
-    // Dessiner le contenu du canvas de dessin (flèches) avec la transformation appliquée
-    tempCtx.drawImage(canvas, 0, 0);
-
-    // Restaurer le contexte
-    tempCtx.restore();
-
-    // Solution pour Tauri
     try {
         await invoke('copy_image_to_clipboard', {
             base64Data: tempCanvas.toDataURL('image/png'),
         });
         showFeedback('✓ Copié !');
-        return;
     } catch (err) {
         console.error('Erreur Tauri:', err);
-    }
-
-    // Fallback pour navigateur
-    try {
-        // Demande la permission si nécessaire
-        const permission = await navigator.permissions.query({
-            name: 'clipboard-write',
-        });
-
-        if (permission.state === 'granted' || permission.state === 'prompt') {
-            tempCanvas.toBlob(async (blob) => {
-                try {
-                    await navigator.clipboard.write([
-                        new ClipboardItem({
-                            'image/png': blob,
-                        }),
-                    ]);
-                    showFeedback('✓ Copié !');
-                } catch (err) {
-                    console.error('Erreur Clipboard API:', err);
-                    downloadFallback(tempCanvas.toDataURL('image/png'));
-                }
-            }, 'image/png');
-        } else {
+        // fallback navigateur
+        try {
+            const permission = await navigator.permissions.query({ name: 'clipboard-write' });
+            if (permission.state === 'granted' || permission.state === 'prompt') {
+                tempCanvas.toBlob(async (blob) => {
+                    try {
+                        await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]);
+                        showFeedback('✓ Copié !');
+                    } catch (err) {
+                        console.error('Erreur Clipboard API:', err);
+                        downloadFallback(tempCanvas.toDataURL('image/png'));
+                    }
+                }, 'image/png');
+            } else {
+                downloadFallback(tempCanvas.toDataURL('image/png'));
+            }
+        } catch (err) {
+            console.error('Erreur générale:', err);
             downloadFallback(tempCanvas.toDataURL('image/png'));
         }
-    } catch (err) {
-        console.error('Erreur générale:', err);
-        downloadFallback(tempCanvas.toDataURL('image/png'));
     }
 }
+
+/**
+ * Fusionne l'image de fond (#screenshot) avec le canvas de dessin (#drawing-canvas)
+ * et retourne un canvas avec le rendu final.
+ * @returns {Promise<HTMLCanvasElement>}
+ */
+async function mergeScreenshotWithAnnotations() {
+    const imgElement = document.getElementById('screenshot');
+    const drawingCanvas = document.getElementById('drawing-canvas');
+
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = imgElement.naturalWidth;
+    tempCanvas.height = imgElement.naturalHeight;
+
+    const tempCtx = tempCanvas.getContext('2d');
+
+    // Charger l'image de fond
+    const img = new Image();
+    img.src = imgElement.src;
+
+    await new Promise((resolve) => {
+        img.onload = resolve;
+    });
+
+    // Dessiner l'image d'arrière-plan
+    tempCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
+
+    // Calcul du scale entre le canvas visible et la vraie image
+    const scaleX = tempCanvas.width / drawingCanvas.width;
+    const scaleY = tempCanvas.height / drawingCanvas.height;
+
+    // Appliquer le scale
+    tempCtx.save();
+    tempCtx.scale(scaleX, scaleY);
+    tempCtx.drawImage(drawingCanvas, 0, 0);
+    tempCtx.restore();
+
+    return tempCanvas;
+}
+
 function downloadFallback(base64Data) {
     const link = document.createElement('a');
     link.href = base64Data;
