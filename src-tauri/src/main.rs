@@ -27,6 +27,7 @@ fn main() {
             greet,
             captur::capture_base64,
             captur::copy_image_to_clipboard,
+            captur::copy_text_to_clipboard,
             store::save_api_keys,
             store::get_api_key,
             store::make_api_request,

@@ -72,6 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         base64Data: base64Data
                     });
                     console.log("Résultat de l'envoi:", result);
+                    greetMsgEl.textContent = result;
+                    await invoke('copy_text_to_clipboard', {
+                        link: result
+                    });
                     showFeedback("📤 Image envoyée !");
                 });
             } catch (error) {
@@ -219,6 +223,7 @@ greetMsgEl.innerHTML = getRandomSlogan();
 //         downloadFallback(imgElement.src);
 //     }
 // }
+
 async function copyImageToClipboard() {
     const tempCanvas = await mergeScreenshotWithAnnotations();
 

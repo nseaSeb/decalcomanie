@@ -27,6 +27,20 @@ fn normalized(filename: String) -> String {
 //     println!("Délai: {:?}", start.elapsed());
 // }
 #[tauri::command]
+pub fn copy_text_to_clipboard(link: String) -> Result<(), String> {
+    use arboard::Clipboard;
+
+    let mut clipboard =
+        Clipboard::new().map_err(|e| format!("Erreur initialisation presse-papier: {}", e))?;
+
+    clipboard
+        .set_text(link)
+        .map_err(|e| format!("Erreur copie lien texte: {}", e))?;
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn copy_image_to_clipboard(base64_data: String) -> Result<(), String> {
     use arboard::Clipboard;
     use image::load_from_memory;

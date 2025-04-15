@@ -166,7 +166,12 @@ pub async fn upload_base64_to_sellsy(token: String, folder_id: String, base64_da
 
     println!("✅ JSON reçu: {:?}", json_response);
 
-    Ok(format!("Upload réussi : {:?}", json_response))
+
+    let public_link = json_response["public_link"]
+    .as_str()
+    .ok_or("Le champ 'public_link' est manquant ou invalide")?;
+
+Ok(public_link.to_string())
 }
 
 
