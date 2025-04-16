@@ -1,16 +1,16 @@
 use arboard;
 use base64::engine::general_purpose;
 use base64::Engine as _;
-use fs_extra::dir;
+//use fs_extra::dir;
 use image::{DynamicImage, ImageOutputFormat, RgbaImage};
 use std::io::Cursor;
 use std::time::Instant;
 use tauri::command;
 use xcap::Monitor;
-use xcap::Window;
-fn normalized(filename: String) -> String {
-    filename.replace(['|', '\\', ':', '/'], "")
-}
+//use xcap::Window;
+// fn normalized(filename: String) -> String {
+//     filename.replace(['|', '\\', ':', '/'], "")
+// }
 
 // pub fn capture() {
 //     let start = Instant::now();

@@ -8,11 +8,11 @@ pub struct Briefcase {
 }
 
 impl Briefcase {
-    pub fn new() -> Self {
-        Self {
-            briefcase_id: None,
-        }
-    }
+    // pub fn new() -> Self {
+    //     Self {
+    //         briefcase_id: None,
+    //     }
+    // }
     
 
     
